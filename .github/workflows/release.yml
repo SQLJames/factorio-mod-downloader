@@ -6,6 +6,10 @@ on:
     tags:
       - "v*"
 
+permissions:
+    contents: write
+    packages: write
+
 jobs:
   tagged-release:
     name: "Tagged Release"
@@ -13,7 +17,7 @@ jobs:
     env:
       VERSION: ${{  github.ref_name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
@@ -27,12 +31,8 @@ jobs:
         uses: securego/gosec@master
         with:
           args: ./...
-      - name: "Build & test"
-        run: |
-          make release
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: wangyoucao577/go-release-action@v1
         with:
-          repo_token: "${{ secrets.PAT }}"
-          prerelease: true
-          files: |
-            ./bin/*
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: linux
+          goarch: amd64
