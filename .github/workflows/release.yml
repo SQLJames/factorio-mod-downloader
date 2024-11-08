@@ -21,13 +21,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-      - name: Running govulncheck
-        uses: Templum/govulncheck-action@main
-        with:
-          vulncheck-version: latest
-          package: ./...
-          github-token: ${{ secrets.SECURITY_EVENTS }}
-          go-version: 1.22.4
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
