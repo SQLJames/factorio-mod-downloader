@@ -30,7 +30,7 @@ func actionDownloadUnofficial(cliContext *cli.Context) error {
 	modName := cliContext.String(flags.NameFlagName)
 	url := cliContext.String(flags.URL)
 	destination := cliContext.Path(flags.Destination)
-	filePath := filepath.Join(destination, modName)
+	filePath := filepath.Join(filepath.Clean(destination), filepath.Clean(modName))
 
 	file, err := os.Create(filePath)
 	if err != nil {

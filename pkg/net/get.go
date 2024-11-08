@@ -24,7 +24,13 @@ func Zip(logger *zap.Logger, destination *os.File, url string) error {
 }
 
 func Get(logger *zap.Logger, url string) (*http.Response, error) {
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		logger.Error("failed to generate request", zap.String("URL", url), zap.Error(err))
+		return nil, fmt.Errorf("failed to generate request %s: %v", url, err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		logger.Error("failed to download file", zap.String("URL", url), zap.Error(err))
 		return nil, fmt.Errorf("failed to download file from %s: %v", url, err)

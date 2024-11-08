@@ -78,7 +78,11 @@ func actionDownloadOfficial(cliContext *cli.Context) error {
 		return fmt.Errorf("failed to read response body: %v", err)
 	}
 	var modPortalReleases modPortalResponse
-	modPortalReleases.Unmarshal(data)
+	err = modPortalReleases.Unmarshal(data)
+	if err != nil {
+		logger.Error("Error marshaling the json into struct")
+		return fmt.Errorf("Error marshaling the json into struct: %v", err)
+	}
 
 	logger.Debug("modPortalList", zap.Array("results", zapcore.ArrayMarshalerFunc(
 		func(ae zapcore.ArrayEncoder) error {
@@ -104,7 +108,7 @@ func actionDownloadOfficial(cliContext *cli.Context) error {
 		return err
 	}
 	logger.Info("Viable Release", zap.String("file", filteredRelease.FileName))
-	filePath := filepath.Join(destination, filteredRelease.FileName)
+	filePath := filepath.Join(filepath.Clean(destination), filepath.Clean(filteredRelease.FileName))
 	file, err := os.Create(filePath)
 	if err != nil {
 		logger.Error("failed to create file", zap.String("filePath", filePath), zap.Error(err))
@@ -143,8 +147,8 @@ type Release struct {
 	Version     string    `json:"version"`
 }
 
-func (mpr *modPortalResponse) Unmarshal(data []byte) {
-	json.Unmarshal(data, &mpr)
+func (mpr *modPortalResponse) Unmarshal(data []byte) error {
+	return json.Unmarshal(data, &mpr)
 }
 
 type FilterFunc func(Release) bool
@@ -171,12 +175,16 @@ func FilterReleases(logger *zap.Logger, releases []Release, filters ...FilterFun
 	logger.Debug("Filtered results", zap.Array("results", zapcore.ArrayMarshalerFunc(
 		func(ae zapcore.ArrayEncoder) error {
 			for _, v := range result {
-				ae.AppendObject(zapcore.ObjectMarshalerFunc(func(oe zapcore.ObjectEncoder) error {
-					oe.AddString("FileName", v.FileName)
-					oe.AddString("Version", v.Version)
-					oe.AddString("FactorioVersion", v.InfoJSON.FactorioVersion)
-					return nil
-				}))
+				err := ae.AppendObject(
+					zapcore.ObjectMarshalerFunc(func(oe zapcore.ObjectEncoder) error {
+						oe.AddString("FileName", v.FileName)
+						oe.AddString("Version", v.Version)
+						oe.AddString("FactorioVersion", v.InfoJSON.FactorioVersion)
+						return nil
+					}))
+				if err != nil {
+					logger.Panic("How the heck did we end up here?")
+				}
 			}
 			return nil
 		},
