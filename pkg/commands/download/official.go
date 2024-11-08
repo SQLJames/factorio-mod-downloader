@@ -109,7 +109,7 @@ func actionDownloadOfficial(cliContext *cli.Context) error {
 	}
 	logger.Info("Viable Release", zap.String("file", filteredRelease.FileName))
 	filePath := filepath.Join(filepath.Clean(destination), filepath.Clean(filteredRelease.FileName))
-	file, err := os.Create(filePath)
+	file, err := os.Create(filepath.Clean(filePath))
 	if err != nil {
 		logger.Error("failed to create file", zap.String("filePath", filePath), zap.Error(err))
 		return fmt.Errorf("failed to create file %s: %v", filePath, err)
