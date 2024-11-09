@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"sort"
 
-	"time"
-
 	"io"
+	"net/url"
+	"time"
 
 	"github.com/sqljames/factorio-mod-downloader/pkg/commands/semver"
 	"github.com/sqljames/factorio-mod-downloader/pkg/flags"
@@ -63,7 +63,7 @@ func actionDownloadOfficial(cliContext *cli.Context) error {
 		zap.String("factorioVersion", factorioVersion),
 		zap.String("user", user),
 		zap.String("token", token))
-	url := fmt.Sprintf(modCall, baseurl, modName, user, token)
+	url := fmt.Sprintf(modCall, baseurl, url.QueryEscape(modName), user, token)
 	logger.Info("built url", zap.String("url", url))
 	resp, err := net.Get(logger, url)
 	if err != nil {
