@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o factorio-mod-down
 RUN chmod +x ./cmd/cli
 # Start a new stage from scratch
 FROM debian:stable-slim
-
+RUN apt-get update && apt-get install -y ca-certificates
 # Copy the binary from the build stage
 COPY --from=build /app/factorio-mod-downloader /usr/local/bin/factorio-mod-downloader
 
